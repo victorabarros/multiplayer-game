@@ -36,19 +36,41 @@
 
                 function movePlayer(command) {
                     console.log(`Moving ${command.playerId} with ${command.keyPressed}`)
-                    const keyPressed = command.keyPressed
-                    const player = game.state.players[currentPlayerId]
 
-                    if (keyPressed === 'ArrowUp' && player.y - 1 >= 0) {
-                        player.y--
-                    } else if (keyPressed === 'ArrowDown' && player.y + 1 < screen.height) {
-                        player.y++
-                    } else if (keyPressed === 'ArrowRight' && player.x + 1 < screen.width) {
-                        player.x++
-                    } else if (keyPressed === 'ArrowLeft' && player.x - 1 >= 0) {
-                        player.x--
+                    acceptedActions = {
+                        ArrowUp(player) {
+                            console.log(`Moving up player ${player}`)
+                            if (player.y - 1 >= 0) {
+                                player.y--
+                            }
+                        },
+                        ArrowDown(player) {
+                            console.log(`Moving Down player ${player}`)
+                            if (player.y + 1 < screen.height) {
+                                player.y++
+                            }
+                        },
+                        ArrowRight(player) {
+                            console.log(`Moving Right player ${player}`)
+                            if (player.x + 1 < screen.width) {
+                                player.x++
+                            }
+                        },
+                        ArrowLeft(player) {
+                            console.log(`Moving Left player ${player}`)
+                            if (player.x - 1 >= 0) {
+                                player.x--
+                            }
+                        }
                     }
 
+                    const keyPressed = command.keyPressed
+                    const player = game.state.players[currentPlayerId]
+                    const action = acceptedActions[keyPressed]
+
+                    if (action) {
+                        action(player)
+                    }
                 }
 
                 return {
@@ -68,7 +90,7 @@
                 }
 
                 function notifyAll(command) {
-                    console.log(`notifuing ${state.observers.length} observers`)
+                    console.log(`notifying ${state.observers.length} observers`)
                     for (const observerFunction of state.observers) {
                         observerFunction(command)
                     }
