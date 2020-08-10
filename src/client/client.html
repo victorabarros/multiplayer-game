@@ -23,6 +23,7 @@
             const currentPlayerId = 'player1'
 
             function createGame() {
+                // rules layer
                 const state = {
                     players: {
                         player1: { x: 1, y: 1 },
@@ -56,17 +57,18 @@
                 }
             }
 
-            function createKeyboardObserver() {
+            function createKeyboardListener() {
+                // input layer
                 const state = {
                     observers: []
                 }
 
                 function subscribe(observerFunction) {
-                    state.observer.push(observerFunction)
+                    state.observers.push(observerFunction)
                 }
 
                 function notifyAll(command) {
-                    console.log(`notifuing ${state.observer.length} observers`)
+                    console.log(`notifuing ${state.observers.length} observers`)
                     for (const observerFunction of state.observers) {
                         observerFunction(command)
                     }
@@ -79,12 +81,18 @@
                         playerId: 'player1',
                         keyPressed: event.key
                     }
-                    game.movePlayer(command)
-                    console.log(game.state.players.player1)
+
+                    // console.log(game.state.players[command.playerId])
+                    notifyAll(command)
+                }
+
+                return {
+                    subscribe
                 }
             }
 
             function renderScreen() {
+                // screen layer
                 context.fillStyle = 'white'
                 context.clearRect(0, 0, 10, 10)
 
@@ -103,8 +111,8 @@
             }
 
             const game = createGame()
-            const observer = createKeyboardObserver()
-
+            const listener = createKeyboardListener()
+            listener.subscribe(game.movePlayer)
             renderScreen()
 
         </script>
