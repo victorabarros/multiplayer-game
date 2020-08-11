@@ -6,14 +6,6 @@ APP_DIR = /src/${APP_NAME}
 PWD=$(shell pwd)
 DOCKER_BASE_IMAGE=node:13.3.0
 
-_client:
-	@cd src/client/
-	@npx serve -d -l 8080
-
-_server:
-	@cd src/api/
-	@npx nodemon
-
 clean-up:
 	@docker rm -f ${APP_NAME}-debug
 
