@@ -10,14 +10,14 @@ const sockets = socketio(server)
 app.use(express.static('public'))
 
 const game = createGame()
+game.start()
 
 game.subscribe((command) => {
+    // TODO mover este código pada game.start?
+    // arrow function that emit game event to all sockets
     sockets.emit(command.type, command)
 })
 
-game.addFruit({fruitId: 'fruit1', fruitX: 3, fruitY: 5})
-
-console.log(game.state)
 sockets.on('connection', (socket) => {
     const playerId = socket.id
     game.addPlayer({playerId})
@@ -27,8 +27,14 @@ sockets.on('connection', (socket) => {
     socket.on('disconnect', () => {
         game.removePlayer({playerId})
     })
+
+    socket.on('move-player', (command) => {
+        command.playerId = playerId
+        command.type = 'move-player'
+        game.movePlayer(command)
+    })
 })
 
-server.listen(8080, () => {
-    console.log('server listening port 8080')
+server.listen(8092, () => {
+    console.log(`> Server listening on port: 8092`)
 })

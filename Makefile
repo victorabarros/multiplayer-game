@@ -12,4 +12,4 @@ clean-up:
 debug:
 	@echo "\e[1m\033[33m\nDebug mode\e[0m"
 	@docker run -it -v ${PWD}:${APP_DIR} -w ${APP_DIR} \
-		-p 8092:8080 --rm --name ${APP_NAME}-debug ${DOCKER_BASE_IMAGE} bash
+		-p 8092:8092 --rm --name ${APP_NAME}-debug ${DOCKER_BASE_IMAGE} bash

@@ -1,6 +1,5 @@
 export default function createGame() {
     // rules layer
-    const currentPlayerId = 'player1'
     const state = {
         players: {},
         fruits: {},
@@ -12,11 +11,18 @@ export default function createGame() {
 
     const observers = []
 
+    function start() {
+        const frequency = 2000
+        setInterval(addFruit, frequency)
+    }
+
     function subscribe(observerFunction) {
+        // Method do substribe observer
         observers.push(observerFunction)
     }
 
     function notifyAll(command) {
+        // discharge event to all observers
         for (const observerFunction of observers) {
             observerFunction(command)
         }
@@ -27,48 +33,76 @@ export default function createGame() {
     }
 
     function addPlayer(command) {
-        state.players[command.playerId] = {
-            x: 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width),
-            y: 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height)
+        const playerId = command.playerId
+        const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width)
+        const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height)
+
+        state.players[playerId] = {
+            x: playerX,
+            y: playerY
         }
 
         notifyAll({
             type: 'add-player',
-            playerId: command.playerId,
-            playerX: state.players[command.playerId].x,
-            playerY: state.players[command.playerId].y,
+            playerId: playerId,
+            playerX: playerX,
+            playerY: playerY
         })
     }
 
-    function removePlayer({playerId}) {
+    function removePlayer(command) {
+        const playerId = command.playerId
+
         delete state.players[playerId]
+
+        notifyAll({
+            type: 'remove-player',
+            playerId: playerId
+        })
     }
 
     function addFruit(command) {
-        state.fruits[command.fruitId] = {
-            x: command.fruitX,
-            y: command.fruitY
+        const fruitId = command ? command.fruitId : Math.floor(Math.random() * 10000000)
+        const fruitX = command ? command.fruitX : Math.floor(Math.random() * state.screen.width)
+        const fruitY = command ? command.fruitY : Math.floor(Math.random() * state.screen.height)
+
+        state.fruits[fruitId] = {
+            x: fruitX,
+            y: fruitY
         }
+
+        notifyAll({
+            type: 'add-fruit',
+            fruitId: fruitId,
+            fruitX: fruitX,
+            fruitY: fruitY
+        })
     }
 
     function removeFruit({fruitId}) {
         delete state.fruits[fruitId]
+
+        notifyAll({
+            type: 'remove-fruit',
+            fruitId: fruitId,
+        })
     }
 
-    function checkForCollision(playerId) {
+    function checkForFruitCollision(playerId) {
         const player = state.players[playerId]
         for (const fruitId in state.fruits) {
             const fruit = state.fruits[fruitId]
 
             if (player.x === fruit.x && player.y === fruit.y) {
-                console.log(`Collision`)
                 removeFruit({fruitId})
             }
         }
     }
 
     function movePlayer(command) {
-        const acceptedActions = {
+        notifyAll(command)
+
+        const acceptedMoves = {
             ArrowUp(player) {
                 if (player.y - 1 >= 0) {
                     player.y--
@@ -93,23 +127,24 @@ export default function createGame() {
 
         const keyPressed = command.keyPressed
         const playerId = command.playerId
-        const player = game.state.players[playerId]
-        const action = acceptedActions[keyPressed]
+        const player = state.players[playerId]
+        const moveFunction = acceptedMoves[keyPressed]
 
-        if (player && action) {
-            action(player)
-            checkForCollision(playerId)
+        if (player && moveFunction) {
+            moveFunction(player)
+            checkForFruitCollision(playerId)
         }
+
     }
 
     return {
         addFruit,
         addPlayer,
         movePlayer,
-        notifyAll,
         removeFruit,
         removePlayer,
         setState,
+        start,
         state,
         subscribe,
     }
