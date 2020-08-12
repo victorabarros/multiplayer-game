@@ -5,8 +5,8 @@ export default function createKeyboardListener(document) {
         playerId: null
     }
 
-    function registerPlayerId(playerId) {
-        state.playerId = playerId
+    function registerPlayerId(id) {
+        state.playerId = id
     }
 
     // TODO código duplicado aqui em em game.js
@@ -23,19 +23,17 @@ export default function createKeyboardListener(document) {
         }
     }
 
-    document.addEventListener('keydown', handleKeydown)
-
-    function handleKeydown(event) {
-        const keyPressed = event.key
-
+    function handleKeydown({ key }) {
         const command = {
-            type: 'move-player',
+            type: 'move-player', // TODO rename to action
             playerId: state.playerId,
-            keyPressed
+            keyPressed: key
         }
 
         notifyAll(command)
     }
+
+    document.addEventListener('keydown', handleKeydown)
 
     return {
         subscribe,
